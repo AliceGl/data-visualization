@@ -8,10 +8,33 @@ import org.jetbrains.skiko.SkiaWindow
 import java.awt.Dimension
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
+import java.io.File
 import javax.swing.WindowConstants
 
-fun main() {
-    createWindow("pf-2021-viz")
+data class InputData (val names: List<String>, val firstRow: List<String>, val data: List<List<Int>>)
+
+fun getDataFromFile(filePath: String) : InputData {
+    if (!File(filePath).exists() || !File(filePath).isFile)
+        throw FileNotFound(filePath)
+    val lines = File(filePath).readLines()
+    return InputData( lines.map {it.split(" ").getOrNull(0) ?: throw NotEnoughData()},
+        lines.getOrNull(0)?.split(" ")?.drop(1) ?: throw NotEnoughData(),
+        lines.drop(1).map { line ->
+            line.split(" ").drop(1).map {
+            it.toIntOrNull() ?: throw WrongDataFormat()
+        }}
+    )
+}
+
+fun main(args: Array<String>) {
+    if (args.isEmpty())
+        return
+    try {
+        val inputData = getDataFromFile(args[0])
+        createWindow("pf-2021-viz")
+    } catch (e : Exception) {
+        println(e.message)
+    }
 }
 
 fun createWindow(title: String) = runBlocking(Dispatchers.Swing) {
@@ -32,8 +55,8 @@ fun createWindow(title: String) = runBlocking(Dispatchers.Swing) {
 class Renderer(val layer: SkiaLayer): SkiaRenderer {
     val typeface = Typeface.makeFromFile("fonts/JetBrainsMono-Regular.ttf")
     val font = Font(typeface, 40f)
-    val paint = Paint().apply {
-        color = 0xff9BC730L.toInt()
+    val blackPaint = Paint().apply {
+        color = 0xff000000.toInt()
         mode = PaintMode.FILL
         strokeWidth = 1f
     }
