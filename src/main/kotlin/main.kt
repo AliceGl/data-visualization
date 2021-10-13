@@ -1,11 +1,9 @@
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.swing.Swing
-import org.jetbrains.skija.*
-import org.jetbrains.skiko.SkiaLayer
-import org.jetbrains.skiko.SkiaRenderer
 import org.jetbrains.skiko.SkiaWindow
 import java.awt.Dimension
+import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
 import java.io.File
@@ -26,24 +24,30 @@ fun getDataFromFile(filePath: String) : InputData {
     )
 }
 
+enum class MainWindowStatus { ChoosingDiagram, DiagramParameters }
+
+val status = MainWindowStatus.ChoosingDiagram
+
 fun main(args: Array<String>) {
     if (args.isEmpty())
         return
     try {
         val inputData = getDataFromFile(args[0])
-        createWindow("pf-2021-viz")
+        createMainWindow("pf-2021-viz")
     } catch (e : Exception) {
         println(e.message)
     }
 }
 
-fun createWindow(title: String) = runBlocking(Dispatchers.Swing) {
+fun createMainWindow(title: String) = runBlocking(Dispatchers.Swing) {
     val window = SkiaWindow()
     window.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
     window.title = title
 
-    window.layer.renderer = Renderer(window.layer)
+    window.layer.renderer = MainRenderer(window.layer)
     window.layer.addMouseMotionListener(MyMouseMotionAdapter)
+    window.layer.addMouseListener(MyMouseAdapter)
+    window.layer
 
     window.preferredSize = Dimension(800, 600)
     window.minimumSize = Dimension(100,100)
@@ -52,25 +56,19 @@ fun createWindow(title: String) = runBlocking(Dispatchers.Swing) {
     window.isVisible = true
 }
 
-class Renderer(val layer: SkiaLayer): SkiaRenderer {
-    val typeface = Typeface.makeFromFile("fonts/JetBrainsMono-Regular.ttf")
-    val font = Font(typeface, 40f)
-    val blackPaint = Paint().apply {
-        color = 0xff000000.toInt()
-        mode = PaintMode.FILL
-        strokeWidth = 1f
-    }
+fun createDiagramWindow(title: String) = runBlocking(Dispatchers.Swing) {
+    val window = SkiaWindow()
+    window.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
+    window.title = title
 
-    override fun onRender(canvas: Canvas, width: Int, height: Int, nanoTime: Long) {
-        val contentScale = layer.contentScale
-        canvas.scale(contentScale, contentScale)
-        val w = (width / contentScale).toInt()
-        val h = (height / contentScale).toInt()
+    window.layer.renderer = DiagramRenderer(window.layer)
+    window.layer.addMouseMotionListener(MyMouseMotionAdapter)
 
-        // РИСОВАНИЕ
-
-        layer.needRedraw()
-    }
+    window.preferredSize = Dimension(800, 600)
+    window.minimumSize = Dimension(100,100)
+    window.pack()
+    window.layer.awaitRedraw()
+    window.isVisible = true
 }
 
 object State {
@@ -82,5 +80,11 @@ object MyMouseMotionAdapter : MouseMotionAdapter() {
     override fun mouseMoved(event: MouseEvent) {
         State.mouseX = event.x.toFloat()
         State.mouseY = event.y.toFloat()
+    }
+}
+
+object MyMouseAdapter : MouseAdapter() {
+    override fun mouseClicked(e: MouseEvent?) {
+        TODO()
     }
 }
