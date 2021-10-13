@@ -12,3 +12,14 @@ val chartDrawFunction = mapOf(
     ChartType.Pie to ::drawPieChart,
     ChartType.Radar to ::drawRadarChart
 )
+
+val nameOfChart = mapOf(
+    ChartType.Bar to "Гистограмма",
+    ChartType.StackedBar to "Гистограмма с накоплением",
+    ChartType.NormStackedBAr to "Нормированная гистограмма с накоплением",
+    ChartType.Line to "График",
+    ChartType.Area to "С областями и накоплением",
+    ChartType.NormArea to "Нормированная с областями и накоплением",
+    ChartType.Pie to "Круговая",
+    ChartType.Radar to "Радиальная"
+)
