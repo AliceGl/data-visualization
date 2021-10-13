@@ -18,23 +18,24 @@ class MainRenderer(val layer: SkiaLayer): SkiaRenderer {
         val h = (height / contentScale).toInt()
 
         when(status) {
-            MainWindowStatus.ChoosingDiagram -> drawChoosingDiagramScreen(canvas, w, h)
-            MainWindowStatus.DiagramParameters -> drawDiagramParametersScreen(canvas, w, h)
+            MainWindowStatus.ChoosingChart -> drawChoosingChartScreen(canvas, w, h)
+            MainWindowStatus.ChartParameters -> drawChartParametersScreen(canvas, w, h)
         }
 
         layer.needRedraw()
     }
 }
 
-fun drawChoosingDiagramScreen(canvas: Canvas, w: Int, h : Int) {
-    TODO()
+    private fun drawChoosingChartScreen(canvas: Canvas, w: Int, h : Int) {
+        TODO()
+    }
+
+    private fun drawChartParametersScreen(canvas: Canvas, w: Int, h: Int) {
+        TODO()
+    }
 }
 
-fun drawDiagramParametersScreen(canvas: Canvas, w: Int, h: Int) {
-    TODO()
-}
-
-class DiagramRenderer(val layer: SkiaLayer): SkiaRenderer {
+class ChartRenderer(val layer: SkiaLayer): SkiaRenderer {
     val typeface = Typeface.makeFromFile("fonts/JetBrainsMono-Regular.ttf")
     val font = Font(typeface, 40f)
     val blackPaint = Paint().apply {

@@ -38,9 +38,9 @@ fun checkData(inputData: InputData) {
     }
 }
 
-enum class MainWindowStatus { ChoosingDiagram, DiagramParameters }
+enum class MainWindowStatus { ChoosingChart, ChartParameters }
 
-val status = MainWindowStatus.ChoosingDiagram
+val status = MainWindowStatus.ChoosingChart
 
 fun main(args: Array<String>) {
     if (args.isEmpty())
@@ -71,12 +71,12 @@ fun createMainWindow(title: String) = runBlocking(Dispatchers.Swing) {
     window.isVisible = true
 }
 
-fun createDiagramWindow(title: String) = runBlocking(Dispatchers.Swing) {
+fun createChartWindow(title: String) = runBlocking(Dispatchers.Swing) {
     val window = SkiaWindow()
     window.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
     window.title = title
 
-    window.layer.renderer = DiagramRenderer(window.layer)
+    window.layer.renderer = ChartRenderer(window.layer)
     window.layer.addMouseMotionListener(MyMouseMotionAdapter)
 
     window.preferredSize = Dimension(800, 600)
