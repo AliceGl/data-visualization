@@ -55,3 +55,35 @@ class ChartRenderer(val layer: SkiaLayer): SkiaRenderer {
         layer.needRedraw()
     }
 }
+
+fun drawBarChart() {
+    TODO()
+}
+
+fun drawStackedBarChart() {
+    TODO()
+}
+
+fun drawNormStackedBarChart() {
+    TODO()
+}
+
+fun drawLineChart() {
+    TODO()
+}
+
+fun drawAreaChart() {
+    TODO()
+}
+
+fun drawNormAreaChart() {
+    TODO()
+}
+
+fun drawPieChart() {
+    TODO()
+}
+
+fun drawRadarChart() {
+    TODO()
+}
