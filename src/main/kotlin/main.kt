@@ -24,6 +24,20 @@ fun getDataFromFile(filePath: String) : InputData {
     )
 }
 
+fun checkData(inputData: InputData) {
+    if (inputData.data.isEmpty())
+        throw NotEnoughData()
+    val len = inputData.firstRow.size
+    if (len == 0)
+        throw NotEnoughData()
+    inputData.data.forEach {
+        if (it.size != len)
+            throw WrongDataFormat()
+        if (!it.all {x -> x >= 0})
+            throw WrongDataFormat()
+    }
+}
+
 enum class MainWindowStatus { ChoosingDiagram, DiagramParameters }
 
 val status = MainWindowStatus.ChoosingDiagram
@@ -33,6 +47,7 @@ fun main(args: Array<String>) {
         return
     try {
         val inputData = getDataFromFile(args[0])
+        checkData(inputData)
         createMainWindow("pf-2021-viz")
     } catch (e : Exception) {
         println(e.message)

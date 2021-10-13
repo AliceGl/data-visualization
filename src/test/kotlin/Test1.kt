@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.assertDoesNotThrow
 import kotlin.test.*
 import kotlin.io.path.createTempFile
 import kotlin.io.path.pathString
@@ -29,5 +30,48 @@ internal class Test1 {
             "Outcome 470 what 350"))
         assertFailsWith<WrongDataFormat> { getDataFromFile(temp.pathString) }
 
+    }
+
+    @Test
+    fun testCheckData() {
+        assertFailsWith<NotEnoughData> {
+            checkData(InputData(
+                listOf("Months"),
+                listOf("september", "october", "november"),
+                listOf()
+            ))
+        }
+
+        assertFailsWith<NotEnoughData> {
+            checkData(InputData(
+                listOf("Months", "Income", "Outcome"),
+                listOf(),
+                listOf(listOf(1000, 10, 350), listOf(470, 3000, 350))
+            ))
+        }
+
+        assertFailsWith<WrongDataFormat> {
+            checkData(InputData(
+                listOf("Months", "Income"),
+                listOf("september", "october", "november"),
+                listOf(listOf(1000, 10))
+            ))
+        }
+
+        assertFailsWith<WrongDataFormat> {
+            checkData(InputData(
+                listOf("Months", "Income", "Outcome"),
+                listOf("september", "october", "november"),
+                listOf(listOf(1000, 10, 350), listOf(470, 3000, -350))
+            ))
+        }
+
+        assertDoesNotThrow {
+            checkData(InputData(
+                listOf("Months", "Income", "Outcome"),
+                listOf("september", "october", "november"),
+                listOf(listOf(1000, 10, 350), listOf(470, 3000, 350))
+            ))
+        }
     }
 }
