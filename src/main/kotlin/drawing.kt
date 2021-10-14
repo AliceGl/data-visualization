@@ -1,6 +1,7 @@
 import org.jetbrains.skija.*
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkiaRenderer
+import java.awt.Polygon
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.min
@@ -272,13 +273,41 @@ fun drawLineChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 }
 
 fun drawAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    // временно
-    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
-    canvas.drawPolygon(arrayOf(
-        Point(x, y), Point(x + w, y),
-        Point(x + w, y + h), Point(x, y + h)),
-        blackPaint
-    )
+    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val prefixSums = List(inputData.firstRow.size) { mutableListOf(0) }
+    for (i in inputData.firstRow.indices) {
+        inputData.data.forEach {
+            prefixSums[i].add(prefixSums[i].last() + it[i])
+        }
+    }
+    val maxValue = prefixSums.maxOf { it.last() }
+    val (step, stepNum) = calculateStep(0, maxValue) // вертикальный шаг сетки и количество делений
+
+    val fontSize = w / 80
+    val font = Font(typeface, fontSize)
+    val leftTab = font.measureTextWidth((step * stepNum).toString()) * 15 / 10
+    val bottomTab = fontSize * 15 / 10
+
+    val len = inputData.firstRow.size
+    drawGrid(canvas, x + leftTab, y, w - leftTab, h - bottomTab, stepNum, len)
+
+    drawScale(canvas, step, stepNum, x, y, h - bottomTab, font)
+
+    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    inputData.firstRow.forEachIndexed { i, name ->
+        canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
+            y + h, font, blackPaint)
+    }
+
+    for (pos in dataNum - 1 downTo 0) {
+        val heights = prefixSums.map { it[pos + 1].toFloat() / step * (h - bottomTab) / stepNum }
+        val path = Path()
+        path.moveTo(Point(x + leftTab + horStepLen, y + h - bottomTab))
+        for (i in heights.indices)
+            path.lineTo(Point(x + leftTab + horStepLen * (i + 1), y + h - bottomTab - heights[i]))
+        path.lineTo(Point(x + w - horStepLen, y + h - bottomTab))
+        canvas.drawPath(path, palettes[chosenPalette][pos])
+    }
 }
 
 fun drawNormAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
