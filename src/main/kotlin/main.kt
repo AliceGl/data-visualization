@@ -40,7 +40,11 @@ fun checkData(inputData: InputData) {
 
 enum class MainWindowStatus { ChoosingChart, ChartParameters }
 
-val status = MainWindowStatus.ChoosingChart
+var status = MainWindowStatus.ChoosingChart
+var chosenChart : ChartType? = null
+
+data class Button(val x0: Float, val y0: Float, val x1: Float, val y1: Float, val clickAction: () -> (Unit))
+val buttons : MutableList<Button> = mutableListOf()
 
 fun main(args: Array<String>) {
     if (args.isEmpty())
@@ -62,7 +66,6 @@ fun createMainWindow(title: String) = runBlocking(Dispatchers.Swing) {
     window.layer.renderer = MainRenderer(window.layer)
     window.layer.addMouseMotionListener(MyMouseMotionAdapter)
     window.layer.addMouseListener(MyMouseAdapter)
-    window.layer
 
     window.preferredSize = Dimension(800, 600)
     window.minimumSize = Dimension(100,100)
@@ -99,7 +102,10 @@ object MyMouseMotionAdapter : MouseMotionAdapter() {
 }
 
 object MyMouseAdapter : MouseAdapter() {
-    override fun mouseClicked(e: MouseEvent?) {
-        TODO()
+    override fun mouseClicked(e: MouseEvent) {
+        buttons.forEach {
+            if (it.x0 < e.x && e.x < it.x1 && it.y0 < e.y && e.y < it.y1)
+                it.clickAction.invoke()
+        }
     }
 }

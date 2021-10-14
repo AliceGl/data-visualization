@@ -2,15 +2,7 @@ import org.jetbrains.skija.*
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkiaRenderer
 
-class MainRenderer(val layer: SkiaLayer): SkiaRenderer {
-    private val typeface = Typeface.makeFromFile("fonts/JetBrainsMono-Regular.ttf")
-    private val headerFont = Font(typeface, 40f)
-    private val basicFont = Font(typeface, 10f)
-    private val blackPaint = Paint().apply {
-        color = 0xff000000.toInt()
-        mode = PaintMode.FILL
-        strokeWidth = 1f
-    }
+class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
 
     override fun onRender(canvas: Canvas, width: Int, height: Int, nanoTime: Long) {
         val contentScale = layer.contentScale
@@ -33,6 +25,7 @@ class MainRenderer(val layer: SkiaLayer): SkiaRenderer {
         val chunkW = w.toFloat() / 3
         val chunkH = (h - headerH) / 3 // Размеры одной части экрана, в которой помещается один вид диаграммы
 
+        buttons.clear()
         for (chunkX in 0..2) {
             for (chunkY in 0..2) {
                 val chartIdx = chunkY * 3 + chunkX
@@ -56,6 +49,10 @@ class MainRenderer(val layer: SkiaLayer): SkiaRenderer {
                     Point(rectX1, rectY1), Point(rectX1, rectY0),
                     Point(rectX0, rectY0)
                 ), blackPaint)
+                buttons.add(Button(rectX0, rectY0, rectX1, rectY1) {
+                    status = MainWindowStatus.ChartParameters
+                    chosenChart = chartType
+                })
 
                 // предпросмотр диаграммы
                 chartDrawFunction[chartType]?.invoke(canvas,
@@ -65,18 +62,15 @@ class MainRenderer(val layer: SkiaLayer): SkiaRenderer {
     }
 
     private fun drawChartParametersScreen(canvas: Canvas, w: Int, h: Int) {
-        TODO()
+        require(chosenChart != null)
+        val chartName = nameOfChart[chosenChart]
+        require(chartName != null)
+        // временно
+        canvas.drawString(chartName, 30f, 30f, headerFont, blackPaint)
     }
 }
 
-class ChartRenderer(val layer: SkiaLayer): SkiaRenderer {
-    val typeface = Typeface.makeFromFile("fonts/JetBrainsMono-Regular.ttf")
-    val font = Font(typeface, 40f)
-    val blackPaint = Paint().apply {
-        color = 0xff000000.toInt()
-        mode = PaintMode.FILL
-        strokeWidth = 1f
-    }
+class ChartRenderer(private val layer: SkiaLayer): SkiaRenderer {
 
     override fun onRender(canvas: Canvas, width: Int, height: Int, nanoTime: Long) {
         val contentScale = layer.contentScale
@@ -84,40 +78,88 @@ class ChartRenderer(val layer: SkiaLayer): SkiaRenderer {
         val w = (width / contentScale).toInt()
         val h = (height / contentScale).toInt()
 
-        TODO()
+
 
         layer.needRedraw()
     }
 }
 
 fun drawBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    TODO()
+    // временно
+    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
+    canvas.drawPolygon(arrayOf(
+        Point(x, y), Point(x + w, y),
+        Point(x + w, y + h), Point(x, y + h)),
+        blackPaint
+    )
 }
 
 fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    TODO()
+    // временно
+    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
+    canvas.drawPolygon(arrayOf(
+        Point(x, y), Point(x + w, y),
+        Point(x + w, y + h), Point(x, y + h)),
+        blackPaint
+    )
 }
 
 fun drawNormStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    TODO()
+    // временно
+    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
+    canvas.drawPolygon(arrayOf(
+        Point(x, y), Point(x + w, y),
+        Point(x + w, y + h), Point(x, y + h)),
+        blackPaint
+    )
 }
 
 fun drawLineChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    TODO()
+    // временно
+    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
+    canvas.drawPolygon(arrayOf(
+        Point(x, y), Point(x + w, y),
+        Point(x + w, y + h), Point(x, y + h)),
+        blackPaint
+    )
 }
 
 fun drawAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    TODO()
+    // временно
+    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
+    canvas.drawPolygon(arrayOf(
+        Point(x, y), Point(x + w, y),
+        Point(x + w, y + h), Point(x, y + h)),
+        blackPaint
+    )
 }
 
 fun drawNormAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    TODO()
+    // временно
+    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
+    canvas.drawPolygon(arrayOf(
+        Point(x, y), Point(x + w, y),
+        Point(x + w, y + h), Point(x, y + h)),
+        blackPaint
+    )
 }
 
 fun drawPieChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    TODO()
+    // временно
+    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
+    canvas.drawPolygon(arrayOf(
+        Point(x, y), Point(x + w, y),
+        Point(x + w, y + h), Point(x, y + h)),
+        blackPaint
+    )
 }
 
 fun drawRadarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    TODO()
+    // временно
+    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
+    canvas.drawPolygon(arrayOf(
+        Point(x, y), Point(x + w, y),
+        Point(x + w, y + h), Point(x, y + h)),
+        blackPaint
+    )
 }
