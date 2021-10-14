@@ -1,7 +1,4 @@
-import org.jetbrains.skija.Font
-import org.jetbrains.skija.Paint
-import org.jetbrains.skija.PaintMode
-import org.jetbrains.skija.Typeface
+import org.jetbrains.skija.*
 
 val typeface = Typeface.makeFromFile("fonts/JetBrainsMono-Regular.ttf")
 val headerFont = Font(typeface, 40f)
@@ -18,3 +15,21 @@ val greyPaint = Paint().apply {
     mode = PaintMode.FILL
     strokeWidth = 1f
 }
+
+fun makePaint(colorGiven: Int): Paint = Paint().apply {
+    color = colorGiven
+    mode = PaintMode.FILL
+    strokeWidth = 1f
+}
+
+typealias Palette = List<Paint>
+val palettes : List<Palette> = listOf(
+    listOf(
+        makePaint(0xff8C3746.toInt()),
+        makePaint(0xff6380A6.toInt()),
+        makePaint(0xff306C73.toInt()),
+        makePaint(0xff400A14.toInt()),
+        makePaint(0xff306C73.toInt()),
+        makePaint(0xff46D7340.toInt()),
+    )
+)

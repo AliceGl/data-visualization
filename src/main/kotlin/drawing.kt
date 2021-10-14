@@ -114,12 +114,33 @@ fun drawBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
     val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
     val step = calculateStep(0, maxValue) // вертикальный шаг сетки
 
-    val fontSize = w / 60
+    val fontSize = w / 80
     val font = Font(typeface, fontSize)
-    val leftTab = font.measureTextWidth((step * 10).toString()) * 10 / 8
-    val bottomTab = fontSize * 10 / 8
+    val leftTab = font.measureTextWidth((step * 10).toString()) * 15 / 10
+    val bottomTab = fontSize * 15 / 10
 
-    drawGrid(canvas, x + leftTab, y, w - leftTab, h - bottomTab, inputData.firstRow.size)
+    val len = inputData.firstRow.size
+    drawGrid(canvas, x + leftTab, y, w - leftTab, h - bottomTab, len)
+
+    for (i in 0..10) {
+        val text = (i * step).toString().padStart((step * 10).toString().length)
+        canvas.drawString(text, x,y + (10 - i) * (h - bottomTab) / 10 + fontSize / 2, font, blackPaint)
+    }
+
+    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    inputData.firstRow.forEachIndexed { i, name ->
+        canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
+            y + h, font, blackPaint)
+
+        val leftBorder = horStepLen * (i + 1) - horStepLen / 2 * 9 / 10 + x + leftTab
+        val rightBorder = horStepLen * (i + 1) + horStepLen / 2 * 9 / 10 + x + leftTab
+        for (pos in 0 until dataNum) {
+            val left = leftBorder + (rightBorder - leftBorder) / dataNum * pos
+            val right = left + (rightBorder - leftBorder) / dataNum
+            val height = inputData.data[pos][i].toFloat() / step * (h - bottomTab) / 10
+            canvas.drawRect(Rect(left, y + h - height, right, y + h - bottomTab), palettes[chosenPalette][pos])
+        }
+    }
 }
 
 fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
