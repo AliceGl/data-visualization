@@ -56,6 +56,7 @@ fun main(args: Array<String>) {
     try {
         inputData = getDataFromFile(args[0])
         checkData(inputData)
+        createChartWindow("chart")
         createMainWindow("pf-2021-viz")
     } catch (e : Exception) {
         println(e.message)
@@ -80,6 +81,7 @@ fun createMainWindow(title: String) = runBlocking(Dispatchers.Swing) {
 
 fun createChartWindow(title: String) = runBlocking(Dispatchers.Swing) {
     val window = SkiaWindow()
+    window.setLocation(100, 100)
     window.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
     window.title = title
 

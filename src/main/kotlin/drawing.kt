@@ -89,9 +89,16 @@ class ChartRenderer(private val layer: SkiaLayer): SkiaRenderer {
         val w = (width / contentScale).toInt()
         val h = (height / contentScale).toInt()
 
-
+        if (chosenChart != null)
+            drawChartOnScreen(canvas, w, h)
 
         layer.needRedraw()
+    }
+
+    private fun drawChartOnScreen(canvas: Canvas, w: Int, h: Int) {
+        // временно
+        chartDrawFunction[chosenChart]?.invoke(canvas,
+            10f, 10f, w - 20f, h - 20f)
     }
 }
 
