@@ -129,9 +129,10 @@ fun drawGrid(canvas: Canvas, x: Float, y: Float, w: Float, h: Float, height: Int
             x + w / (len + 1) * i, y + h * 99 / 100, blackPaint)
 }
 
-private fun drawScale(canvas: Canvas, step: Int, stepNum: Int, x: Float, y: Float, h: Float, font: Font) {
+private fun drawScale(canvas: Canvas, step: Int, stepNum: Int,
+                      x: Float, y: Float, h: Float, font: Font, isPercent: Boolean = false) {
     for (i in 0..stepNum) {
-        val text = (i * step).toString().padStart((step * stepNum).toString().length)
+        val text = (i * step).toString().padStart((step * stepNum).toString().length) + if (isPercent) "%" else ""
         canvas.drawString(text, x, y + (stepNum - i) * h / stepNum + font.size / 2, font, blackPaint)
     }
 }
@@ -205,13 +206,38 @@ fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) 
 }
 
 fun drawNormStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    // временно
-    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
-    canvas.drawPolygon(arrayOf(
-        Point(x, y), Point(x + w, y),
-        Point(x + w, y + h), Point(x, y + h)),
-        blackPaint
-    )
+    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val prefixSums = List(inputData.firstRow.size) { mutableListOf(0) }
+    for (i in inputData.firstRow.indices) {
+        inputData.data.forEach {
+            prefixSums[i].add(prefixSums[i].last() + it[i])
+        }
+    }
+    val (step, stepNum) = Pair(10, 10) // вертикальный шаг сетки и количество делений
+
+    val fontSize = w / 80
+    val font = Font(typeface, fontSize)
+    val leftTab = font.measureTextWidth("100%") * 15 / 10
+    val bottomTab = fontSize * 15 / 10
+
+    val len = inputData.firstRow.size
+    drawGrid(canvas, x + leftTab, y, w - leftTab, h - bottomTab, stepNum, len)
+
+    drawScale(canvas, step, stepNum, x, y, h - bottomTab, font, true)
+
+    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    inputData.firstRow.forEachIndexed { i, name ->
+        canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
+            y + h, font, blackPaint)
+
+        val left = horStepLen * (i + 1) - horStepLen / 2 * 9 / 10 + x + leftTab
+        val right = horStepLen * (i + 1) + horStepLen / 2 * 9 / 10 + x + leftTab
+        for (pos in dataNum - 1 downTo 0) {
+            val height = prefixSums[i][pos + 1].toFloat() / prefixSums[i].last() * (h - bottomTab)
+            canvas.drawRect(Rect(left, y + h - bottomTab - height, right, y + h - bottomTab),
+                palettes[chosenPalette][pos])
+        }
+    }
 }
 
 fun drawLineChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
