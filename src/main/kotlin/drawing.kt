@@ -2,6 +2,7 @@ import org.jetbrains.skija.*
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkiaRenderer
 import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.min
 
 fun createButton(canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float, clickAction: () -> (Unit)) {
@@ -102,37 +103,53 @@ class ChartRenderer(private val layer: SkiaLayer): SkiaRenderer {
     }
 }
 
-fun calculateStep(minValue: Int, maxValue: Int) : Int {
-    return ceil((maxValue - minValue).toFloat() / 10).toInt()
+fun calculateStep(minValue: Int, maxValue: Int) : Pair<Int, Int> {
+    for (stepFirstDigit in listOf(1, 2, 5)) {
+        var stepTenPow = 1
+        repeat(9) {
+            val step = stepFirstDigit * stepTenPow
+            val stepNum = ceil(maxValue.toFloat() / step).toInt() -
+                    floor(minValue.toFloat() / step).toInt()
+            if (stepNum in 5..15)
+                return Pair(step, stepNum)
+            stepTenPow *= 10
+        }
+    }
+    require(false)
+    return Pair(0, 0)
 }
 
-fun drawGrid(canvas: Canvas, x: Float, y: Float, w: Float, h: Float, len: Int) {
+fun drawGrid(canvas: Canvas, x: Float, y: Float, w: Float, h: Float, height: Int, len: Int) {
     canvas.drawLine(x, y, x, y + h, blackPaint)
     canvas.drawLine(x, y + h, x + w, y + h, blackPaint)
-    for (i in 0..9)
-        canvas.drawLine(x, y + h / 10 * i, x + w, y + h / 10 * i, greyPaint)
+    for (i in 0 until height)
+        canvas.drawLine(x, y + h / height * i, x + w, y + h / height * i, greyPaint)
     for (i in 1..len)
         canvas.drawLine(x + w / (len + 1) * i, y + h * 101 / 100,
             x + w / (len + 1) * i, y + h * 99 / 100, blackPaint)
 }
 
+private fun drawScale(canvas: Canvas, step: Int, stepNum: Int, x: Float, y: Float, h: Float, font: Font) {
+    for (i in 0..stepNum) {
+        val text = (i * step).toString().padStart((step * stepNum).toString().length)
+        canvas.drawString(text, x, y + (stepNum - i) * h / stepNum + font.size / 2, font, blackPaint)
+    }
+}
+
 fun drawBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
     val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
     val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
-    val step = calculateStep(0, maxValue) // вертикальный шаг сетки
+    val (step, stepNum) = calculateStep(0, maxValue) // вертикальный шаг сетки и количество делений
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
-    val leftTab = font.measureTextWidth((step * 10).toString()) * 15 / 10
+    val leftTab = font.measureTextWidth((step * stepNum).toString()) * 15 / 10
     val bottomTab = fontSize * 15 / 10
 
     val len = inputData.firstRow.size
-    drawGrid(canvas, x + leftTab, y, w - leftTab, h - bottomTab, len)
+    drawGrid(canvas, x + leftTab, y, w - leftTab, h - bottomTab, stepNum, len)
 
-    for (i in 0..10) {
-        val text = (i * step).toString().padStart((step * 10).toString().length)
-        canvas.drawString(text, x,y + (10 - i) * (h - bottomTab) / 10 + fontSize / 2, font, blackPaint)
-    }
+    drawScale(canvas, step, stepNum, x, y, h - bottomTab, font)
 
     val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
     inputData.firstRow.forEachIndexed { i, name ->
@@ -144,20 +161,47 @@ fun drawBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
         for (pos in 0 until dataNum) {
             val left = leftBorder + (rightBorder - leftBorder) / dataNum * pos
             val right = left + (rightBorder - leftBorder) / dataNum
-            val height = inputData.data[pos][i].toFloat() / step * (h - bottomTab) / 10
-            canvas.drawRect(Rect(left, y + h - height, right, y + h - bottomTab), palettes[chosenPalette][pos])
+            val height = inputData.data[pos][i].toFloat() / step * (h - bottomTab) / stepNum
+            canvas.drawRect(Rect(left, y + h - bottomTab - height, right, y + h - bottomTab),
+                palettes[chosenPalette][pos])
         }
     }
 }
 
 fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    // временно
-    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
-    canvas.drawPolygon(arrayOf(
-        Point(x, y), Point(x + w, y),
-        Point(x + w, y + h), Point(x, y + h)),
-        blackPaint
-    )
+    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val prefixSums = List(inputData.firstRow.size) { mutableListOf(0) }
+    for (i in inputData.firstRow.indices) {
+        inputData.data.forEach {
+            prefixSums[i].add(prefixSums[i].last() + it[i])
+        }
+    }
+    val maxValue = prefixSums.maxOf { it.last() }
+    val (step, stepNum) = calculateStep(0, maxValue) // вертикальный шаг сетки и количество делений
+
+    val fontSize = w / 80
+    val font = Font(typeface, fontSize)
+    val leftTab = font.measureTextWidth((step * stepNum).toString()) * 15 / 10
+    val bottomTab = fontSize * 15 / 10
+
+    val len = inputData.firstRow.size
+    drawGrid(canvas, x + leftTab, y, w - leftTab, h - bottomTab, stepNum, len)
+
+    drawScale(canvas, step, stepNum, x, y, h - bottomTab, font)
+
+    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    inputData.firstRow.forEachIndexed { i, name ->
+        canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
+            y + h, font, blackPaint)
+
+        val left = horStepLen * (i + 1) - horStepLen / 2 * 9 / 10 + x + leftTab
+        val right = horStepLen * (i + 1) + horStepLen / 2 * 9 / 10 + x + leftTab
+        for (pos in dataNum - 1 downTo 0) {
+            val height = prefixSums[i][pos + 1].toFloat() / step * (h - bottomTab) / stepNum
+            canvas.drawRect(Rect(left, y + h - bottomTab - height, right, y + h - bottomTab),
+                palettes[chosenPalette][pos])
+        }
+    }
 }
 
 fun drawNormStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
