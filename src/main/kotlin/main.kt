@@ -46,11 +46,13 @@ var chosenChart : ChartType? = null
 data class Button(val x0: Float, val y0: Float, val x1: Float, val y1: Float, val clickAction: () -> (Unit))
 val buttons : MutableList<Button> = mutableListOf()
 
+lateinit var inputData : InputData
+
 fun main(args: Array<String>) {
     if (args.isEmpty())
         return
     try {
-        val inputData = getDataFromFile(args[0])
+        inputData = getDataFromFile(args[0])
         checkData(inputData)
         createMainWindow("pf-2021-viz")
     } catch (e : Exception) {

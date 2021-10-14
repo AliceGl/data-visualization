@@ -1,6 +1,8 @@
 import org.jetbrains.skija.*
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkiaRenderer
+import kotlin.math.ceil
+import kotlin.math.min
 
 fun createButton(canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float, clickAction: () -> (Unit)) {
     canvas.drawRRect(RRect(
@@ -65,7 +67,7 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
 
                 // предпросмотр диаграммы
                 chartDrawFunction[chartType]?.invoke(canvas,
-                    x, y, chunkW, chunkH - 30f)
+                    x + 10f, y + 10f, chunkW - 20f, chunkH - 50f)
             }
         }
     }
@@ -93,14 +95,31 @@ class ChartRenderer(private val layer: SkiaLayer): SkiaRenderer {
     }
 }
 
+fun calculateStep(minValue: Int, maxValue: Int) : Int {
+    return ceil((maxValue - minValue).toFloat() / 10).toInt()
+}
+
+fun drawGrid(canvas: Canvas, x: Float, y: Float, w: Float, h: Float, len: Int) {
+    canvas.drawLine(x, y, x, y + h, blackPaint)
+    canvas.drawLine(x, y + h, x + w, y + h, blackPaint)
+    for (i in 0..9)
+        canvas.drawLine(x, y + h / 10 * i, x + w, y + h / 10 * i, greyPaint)
+    for (i in 1..len)
+        canvas.drawLine(x + w / (len + 1) * i, y + h * 101 / 100,
+            x + w / (len + 1) * i, y + h * 99 / 100, blackPaint)
+}
+
 fun drawBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    // временно
-    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
-    canvas.drawPolygon(arrayOf(
-        Point(x, y), Point(x + w, y),
-        Point(x + w, y + h), Point(x, y + h)),
-        blackPaint
-    )
+    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
+    val step = calculateStep(0, maxValue) // вертикальный шаг сетки
+
+    val fontSize = w / 60
+    val font = Font(typeface, fontSize)
+    val leftTab = font.measureTextWidth((step * 10).toString()) * 10 / 8
+    val bottomTab = fontSize * 10 / 8
+
+    drawGrid(canvas, x + leftTab, y, w - leftTab, h - bottomTab, inputData.firstRow.size)
 }
 
 fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
