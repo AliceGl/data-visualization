@@ -241,13 +241,34 @@ fun drawNormStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Flo
 }
 
 fun drawLineChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    // временно
-    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
-    canvas.drawPolygon(arrayOf(
-        Point(x, y), Point(x + w, y),
-        Point(x + w, y + h), Point(x, y + h)),
-        blackPaint
-    )
+    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
+    val (step, stepNum) = calculateStep(0, maxValue) // вертикальный шаг сетки и количество делений
+
+    val fontSize = w / 80
+    val font = Font(typeface, fontSize)
+    val leftTab = font.measureTextWidth((step * stepNum).toString()) * 15 / 10
+    val bottomTab = fontSize * 15 / 10
+
+    val len = inputData.firstRow.size
+    drawGrid(canvas, x + leftTab, y, w - leftTab, h - bottomTab, stepNum, len)
+
+    drawScale(canvas, step, stepNum, x, y, h - bottomTab, font)
+
+    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    inputData.firstRow.forEachIndexed { i, name ->
+        canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
+            y + h, font, blackPaint)
+    }
+
+    inputData.data.forEachIndexed { pos, data ->
+        val heights = data.map { it.toFloat() / step * (h - bottomTab) / stepNum }
+        for (i in 1 until data.size) {
+            canvas.drawLine(x + leftTab + horStepLen * i, y + h - bottomTab - heights[i - 1],
+                x + leftTab + horStepLen * (i + 1), y + h - bottomTab - heights[i],
+                palettes[chosenPalette][pos] )
+        }
+    }
 }
 
 fun drawAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
