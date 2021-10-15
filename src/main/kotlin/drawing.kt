@@ -1,10 +1,7 @@
 import org.jetbrains.skija.*
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkiaRenderer
-import java.awt.Polygon
-import kotlin.math.ceil
-import kotlin.math.floor
-import kotlin.math.min
+import kotlin.math.*
 
 fun createButton(canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float, clickAction: () -> (Unit)) {
     canvas.drawRRect(RRect(
@@ -348,13 +345,40 @@ fun drawNormAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 }
 
 fun drawPieChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    // временно
-    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
-    canvas.drawPolygon(arrayOf(
-        Point(x, y), Point(x + w, y),
-        Point(x + w, y + h), Point(x, y + h)),
-        blackPaint
-    )
+    val data = inputData.data.first()
+    val dataNum = min(5, data.size) // максимальное количество сегментов
+    val prefixSums = mutableListOf(0)
+    for (i in 0 until dataNum)
+        prefixSums.add(prefixSums.last() + data[i])
+
+    val fontSize = w / 60
+    val font = Font(typeface, fontSize)
+    val tab = font.measureTextWidth("100%") * 11 / 10
+
+    val centerX = x + w / 2
+    val centerY = y + h / 2
+    val radius = min(w / 2, h / 2) - tab
+    for (i in 0 until dataNum) {
+        val startAngle = prefixSums[i].toFloat() / prefixSums.last()
+        val sweepAngle = data[i].toFloat() / prefixSums.last()
+        canvas.drawArc(centerX - radius, centerY - radius,
+            centerX + radius, centerY + radius,
+            startAngle * 360, sweepAngle * 360,
+            true, palettes[chosenPalette][i])
+        val midAngle = startAngle + sweepAngle / 2
+        var textX = (radius * cos(midAngle * 2 * PI)).toFloat()
+        var textY = (radius * sin(midAngle * 2 * PI)).toFloat()
+        if (textX < 0)
+            textX -= tab
+        else
+            textX += tab / 11
+        if (textY > 0)
+            textY += fontSize * 11 / 10
+        else
+            textY -= fontSize / 10
+        canvas.drawString(round(data[i].toFloat() / prefixSums.last() * 100).toInt().toString() + "%",
+            centerX + textX, centerY + textY, font, blackPaint)
+    }
 }
 
 fun drawRadarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {

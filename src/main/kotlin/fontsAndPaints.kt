@@ -27,9 +27,8 @@ val palettes : List<Palette> = listOf(
     listOf(
         makePaint(0xff8C3746.toInt()),
         makePaint(0xff6380A6.toInt()),
-        makePaint(0xff306C73.toInt()),
         makePaint(0xff400A14.toInt()),
         makePaint(0xff306C73.toInt()),
-        makePaint(0xff46D7340.toInt()),
+        makePaint(0xff6D7340.toInt()),
     )
 )
