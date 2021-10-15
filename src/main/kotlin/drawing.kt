@@ -165,13 +165,12 @@ fun drawLegend(canvas: Canvas, x : Float, y : Float, w: Float, h: Float, names: 
     }
 }
 
-fun calculateStep(minValue: Int, maxValue: Int) : Pair<Int, Int> {
+fun calculateStep(maxValue: Int) : Pair<Int, Int> {
     for (stepFirstDigit in listOf(1, 2, 5)) {
         var stepTenPow = 1
         repeat(9) {
             val step = stepFirstDigit * stepTenPow
-            val stepNum = ceil(maxValue.toFloat() / step).toInt() -
-                    floor(minValue.toFloat() / step).toInt()
+            val stepNum = ceil(maxValue.toFloat() / step).toInt()
             if (stepNum in 5..15)
                 return Pair(step, stepNum)
             stepTenPow *= 10
@@ -202,7 +201,7 @@ private fun drawScale(canvas: Canvas, step: Int, stepNum: Int,
 fun drawBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
     val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
     val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
-    val (step, stepNum) = calculateStep(0, maxValue) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // вертикальный шаг сетки и количество делений
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -240,7 +239,7 @@ fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) 
         }
     }
     val maxValue = prefixSums.maxOf { it.last() }
-    val (step, stepNum) = calculateStep(0, maxValue) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // вертикальный шаг сетки и количество делений
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -305,7 +304,7 @@ fun drawNormStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Flo
 fun drawLineChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
     val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
     val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
-    val (step, stepNum) = calculateStep(0, maxValue) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // вертикальный шаг сетки и количество делений
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -342,7 +341,7 @@ fun drawAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
         }
     }
     val maxValue = prefixSums.maxOf { it.last() }
-    val (step, stepNum) = calculateStep(0, maxValue) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // вертикальный шаг сетки и количество делений
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -448,7 +447,7 @@ fun drawPieChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 fun drawRadarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
     val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
     val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
-    val (step, stepNum) = calculateStep(0, maxValue) // шаг оси и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // шаг оси и количество делений
     val angleStep = 2 * PI / inputData.firstRow.size
 
     val fontSize = w / 80

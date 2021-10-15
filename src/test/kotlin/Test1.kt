@@ -74,4 +74,11 @@ internal class Test1 {
             ))
         }
     }
+
+    @Test
+    fun testCalculateStep() {
+        assertEquals(Pair(10, 11), calculateStep(101))
+        assertEquals(Pair(20, 8), calculateStep(153))
+        assertEquals(Pair(50, 7), calculateStep(333))
+    }
 }
