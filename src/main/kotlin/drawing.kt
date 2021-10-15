@@ -1,6 +1,7 @@
 import org.jetbrains.skija.*
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkiaRenderer
+import java.awt.Polygon
 import kotlin.math.*
 
 fun createButton(canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float, clickAction: () -> (Unit)) {
@@ -382,11 +383,50 @@ fun drawPieChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 }
 
 fun drawRadarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    // временно
-    canvas.drawString("Здесь будет диаграмма", x + 5f, y + h / 2, basicFont, blackPaint)
-    canvas.drawPolygon(arrayOf(
-        Point(x, y), Point(x + w, y),
-        Point(x + w, y + h), Point(x, y + h)),
-        blackPaint
-    )
+    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
+    val (step, stepNum) = calculateStep(0, maxValue) // шаг оси и количество делений
+    val angleStep = 2 * PI / inputData.firstRow.size
+
+    val fontSize = w / 80
+    val font = Font(typeface, fontSize)
+    val tab = inputData.firstRow.maxOf { font.measureTextWidth(it) } * 11 / 10
+
+    val centerX = x + w / 2
+    val centerY = y + h / 2
+    val radius = min(w / 2 - tab, h / 2 - fontSize * 3 / 2)
+    // рисование радиальной сетки
+    for (i in 1..stepNum)
+        canvas.drawCircle(centerX, centerY, radius / stepNum * i,
+            greyPaintStroke)
+    inputData.firstRow.forEachIndexed { i, name ->
+        val deltaX = radius * cos(angleStep * i).toFloat()
+        val deltaY = radius * sin(angleStep * i).toFloat()
+        canvas.drawLine(centerX, centerY,
+            centerX + deltaX, centerY + deltaY, blackPaint)
+        val textLen = font.measureTextWidth(name)
+        canvas.drawString(name, centerX + deltaX + when {
+                    deltaX < -1e-8 -> -textLen - tab / 11
+                    deltaX > 1e-8 -> tab / 11
+                    else -> -textLen / 2
+                },
+            centerY + deltaY + when {
+                deltaY > 1e-8 -> fontSize * 11 / 10
+                deltaY < -1e-8 -> -fontSize / 2
+                else -> fontSize / 2
+            },
+            font, blackPaint)
+    }
+    drawScale(canvas, step, stepNum, centerX - font.measureTextWidth((step * stepNum).toString()) * 11 / 10,
+        centerY - radius, radius, font)
+
+    // рисование данных
+    for (pos in 0 until dataNum) {
+        val polygon = inputData.data[pos].mapIndexed { i, value ->
+            val rad = value.toFloat() / step * radius / stepNum
+            Point(centerX + rad * cos(angleStep * i).toFloat(),
+                centerY + rad * sin(angleStep * i).toFloat())
+        }
+        canvas.drawPolygon((polygon + polygon.first()).toTypedArray(), palettes[chosenPalette][pos])
+    }
 }

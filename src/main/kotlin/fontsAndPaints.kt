@@ -16,10 +16,16 @@ val greyPaint = Paint().apply {
     strokeWidth = 1f
 }
 
+val greyPaintStroke = Paint().apply {
+    color = 0xffcfdbd5.toInt()
+    mode = PaintMode.STROKE
+    strokeWidth = 1f
+}
+
 fun makePaint(colorGiven: Int): Paint = Paint().apply {
     color = colorGiven
     mode = PaintMode.FILL
-    strokeWidth = 1f
+    strokeWidth = 2f
 }
 
 typealias Palette = List<Paint>
