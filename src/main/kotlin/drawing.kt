@@ -25,7 +25,7 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
 
         when(status) {
             MainWindowStatus.ChoosingChart -> drawChoosingChartScreen(canvas, w, h)
-            MainWindowStatus.ChartParameters -> drawChartParametersScreen(canvas, w, h)
+            MainWindowStatus.ChartParameters -> drawChartParametersScreen(canvas)
         }
 
         layer.needRedraw()
@@ -71,12 +71,59 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
         }
     }
 
-    private fun drawChartParametersScreen(canvas: Canvas, w: Int, h: Int) {
+    private fun drawChartParametersScreen(canvas: Canvas) {
         require(chosenChart != null)
-        val chartName = nameOfChart[chosenChart]
-        require(chartName != null)
-        // временно
-        canvas.drawString(chartName, 30f, 30f, headerFont, blackPaint)
+        buttons.clear()
+        canvas.drawString("Параметры", 20f, 20f + headerFont.size, headerFont, blackPaint)
+        canvas.drawString("Выберите цветовую тему", 20f, 100f + headerFont.size, basicFont, blackPaint)
+        val palettesY = 100f + headerFont.size + basicFont.size + 10f
+        for (i in palettes.indices) {
+            createButton(canvas, i * 120f + 20f, palettesY, (i + 1) * 120f, palettesY + 20f) {
+                chosenPalette = i
+            }
+            for (pos in 0..4) {
+                canvas.drawCircle(i * 120f + 20f + pos * 20f + 10f,
+                    palettesY + 10f, 8f, palettes[i][pos])
+            }
+        }
+
+        val showingLegendY = palettesY + 100f
+        val textShowingLegend = "Отображать легенду"
+        canvas.drawString(textShowingLegend, 20f, showingLegendY + 5f,
+            basicFont, blackPaint)
+        val showingLegendButtonX = basicFont.measureTextWidth(textShowingLegend) + 30f
+        createButton(canvas, showingLegendButtonX, showingLegendY - 10f,
+            showingLegendButtonX + 20f, showingLegendY + 10f) {
+            legendShowing = !legendShowing
+        }
+        if (legendShowing) {
+            canvas.drawLine(showingLegendButtonX + 4f, showingLegendY - 6f,
+                showingLegendButtonX + 10f, showingLegendY + 6f, blackPaint)
+            canvas.drawLine(showingLegendButtonX + 10f, showingLegendY + 6f,
+                showingLegendButtonX + 16f, showingLegendY - 6f, blackPaint)
+        }
+
+        val showingValuesY = showingLegendY + 100f
+        val textShowingValues = "Отображать значения"
+        canvas.drawString(textShowingValues, 20f, showingValuesY + 5f,
+            basicFont, blackPaint)
+        val showingValuesButtonX = basicFont.measureTextWidth(textShowingValues) + 30f
+        createButton(canvas, showingValuesButtonX, showingValuesY - 10f,
+            showingValuesButtonX + 20f, showingValuesY + 10f) {
+            valuesShowing = !valuesShowing
+        }
+        if (valuesShowing) {
+            canvas.drawLine(showingValuesButtonX + 4f, showingValuesY - 6f,
+                showingValuesButtonX + 10f, showingValuesY + 6f, blackPaint)
+            canvas.drawLine(showingValuesButtonX + 10f, showingValuesY + 6f,
+                showingValuesButtonX + 16f, showingValuesY - 6f, blackPaint)
+        }
+
+        val saveY = showingValuesY + 100f
+        createButton(canvas, 20f, saveY, 220f, saveY + 40f, ::saveInFile)
+        val saveText = "Сохранить"
+        canvas.drawString(saveText, 20f + (200f - basicFont.measureTextWidth(saveText)) / 2,
+            saveY + 25f, basicFont, blackPaint)
     }
 }
 
