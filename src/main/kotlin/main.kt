@@ -1,6 +1,7 @@
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.swing.Swing
+import org.jetbrains.skija.Surface
 import org.jetbrains.skiko.SkiaWindow
 import java.awt.Dimension
 import java.awt.event.MouseAdapter
@@ -8,6 +9,7 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionAdapter
 import java.io.File
 import javax.swing.WindowConstants
+import kotlin.system.exitProcess
 
 data class InputData (val names: List<String>, val firstRow: List<String>, val data: List<List<Int>>)
 
@@ -46,6 +48,8 @@ data class Button(val x0: Float, val y0: Float, val x1: Float, val y1: Float, va
 val buttons : MutableList<Button> = mutableListOf()
 
 lateinit var inputData : InputData
+
+val surface = Surface.makeRasterN32Premul(800, 600)
 
 fun main(args: Array<String>) {
     if (args.isEmpty())
@@ -113,6 +117,8 @@ object MyMouseAdapter : MouseAdapter() {
     }
 }
 
-fun saveInFile() {
-    TODO()
+fun saveInFileAndExit() {
+    val pngBytes = surface.makeImageSnapshot().encodeToData()!!.bytes
+    File("output.png").writeBytes(pngBytes)
+    exitProcess(0)
 }

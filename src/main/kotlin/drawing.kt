@@ -103,25 +103,9 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
                 showingLegendButtonX + 16f, showingLegendY - 6f, blackPaint)
         }
 
-        val showingValuesY = showingLegendY + 100f
-        val textShowingValues = "Отображать значения"
-        canvas.drawString(textShowingValues, 20f, showingValuesY + 5f,
-            basicFont, blackPaint)
-        val showingValuesButtonX = basicFont.measureTextWidth(textShowingValues) + 30f
-        createButton(canvas, showingValuesButtonX, showingValuesY - 10f,
-            showingValuesButtonX + 20f, showingValuesY + 10f) {
-            valuesShowing = !valuesShowing
-        }
-        if (valuesShowing) {
-            canvas.drawLine(showingValuesButtonX + 4f, showingValuesY - 6f,
-                showingValuesButtonX + 10f, showingValuesY + 6f, blackPaint)
-            canvas.drawLine(showingValuesButtonX + 10f, showingValuesY + 6f,
-                showingValuesButtonX + 16f, showingValuesY - 6f, blackPaint)
-        }
-
-        val saveY = showingValuesY + 100f
-        createButton(canvas, 20f, saveY, 220f, saveY + 40f, ::saveInFile)
-        val saveText = "Сохранить"
+        val saveY = showingLegendY + 100f
+        createButton(canvas, 20f, saveY, 220f, saveY + 40f, ::saveInFileAndExit)
+        val saveText = "Сохранить и выйти"
         canvas.drawString(saveText, 20f + (200f - basicFont.measureTextWidth(saveText)) / 2,
             saveY + 25f, basicFont, blackPaint)
     }
@@ -135,8 +119,12 @@ class ChartRenderer(private val layer: SkiaLayer): SkiaRenderer {
         val w = (width / contentScale).toInt()
         val h = (height / contentScale).toInt()
 
-        if (chosenChart != null)
+        if (chosenChart != null) {
             drawChartOnScreen(canvas, w, h)
+            surface.canvas.resetMatrix()
+            surface.canvas.drawPaint(whitePaint)
+            drawChartOnScreen(surface.canvas, w, h)
+        }
 
         layer.needRedraw()
     }
