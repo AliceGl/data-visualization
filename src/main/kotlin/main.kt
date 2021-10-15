@@ -41,9 +41,6 @@ fun checkData(inputData: InputData) {
 enum class MainWindowStatus { ChoosingChart, ChartParameters }
 
 var status = MainWindowStatus.ChoosingChart
-var chosenChart : ChartType? = null
-
-var chosenPalette = 0
 
 data class Button(val x0: Float, val y0: Float, val x1: Float, val y1: Float, val clickAction: () -> (Unit))
 val buttons : MutableList<Button> = mutableListOf()
