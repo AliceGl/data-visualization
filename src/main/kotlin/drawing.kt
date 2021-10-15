@@ -1,7 +1,6 @@
 import org.jetbrains.skija.*
 import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkiaRenderer
-import java.awt.Polygon
 import kotlin.math.*
 
 fun createButton(canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float, clickAction: () -> (Unit)) {
@@ -96,9 +95,38 @@ class ChartRenderer(private val layer: SkiaLayer): SkiaRenderer {
     }
 
     private fun drawChartOnScreen(canvas: Canvas, w: Int, h: Int) {
-        // временно
+        require(chosenChart != null)
+        val maxChartW : Float = when {
+            legendShowing -> w.toFloat() * 5 / 6
+            else -> w.toFloat()
+        }
+        val chartW = min(maxChartW, h.toFloat() * 4 / 3) * 9 / 10
+        val chartH = chartW * 3 / 4
         chartDrawFunction[chosenChart]?.invoke(canvas,
-            10f, 10f, w - 20f, h - 20f)
+            (maxChartW - chartW) / 2, (h - chartH) / 2, chartW, chartH)
+        if (legendShowing) {
+            drawLegend(canvas, maxChartW, h.toFloat() / 10,
+                (w - maxChartW) * 9 / 10, h.toFloat() * 8 / 10,
+                when (chosenChart) {
+                    ChartType.Pie -> inputData.firstRow
+                    else -> inputData.names.drop(1)
+                })
+        }
+    }
+}
+
+fun drawLegend(canvas: Canvas, x : Float, y : Float, w: Float, h: Float, names: List<String>) {
+    val len = min(names.size, 5)
+    val startY = y + (h - basicFont.size * (len - 1) * 2) / 2
+
+    val fontSize = w / 10
+    val font = Font(typeface, fontSize)
+    for (pos in 0 until len) {
+        canvas.drawRect(Rect(x, startY + fontSize * (pos * 2 - 1),
+            x + fontSize, startY + fontSize * pos * 2),
+            palettes[chosenPalette][pos])
+        canvas.drawString(names[pos], x + fontSize * 1.5f, startY + fontSize * pos * 2,
+            font, blackPaint)
     }
 }
 
