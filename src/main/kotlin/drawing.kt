@@ -32,11 +32,11 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
     }
 
     private fun drawChoosingChartScreen(canvas: Canvas, w: Int, h : Int) {
-        val header = "Выберите тип диаграммы"
+        val header = "Choose chart type"
         canvas.drawString(header, (w - headerFont.measureTextWidth(header)) / 2, headerFont.size + 10f, headerFont, blackPaint)
-        val headerH = headerFont.size + 20f // Высота заголовка с отступами
+        val headerH = headerFont.size + 20f // indented header height
         val chunkW = w.toFloat() / 3
-        val chunkH = (h - headerH) / 3 // Размеры одной части экрана, в которой помещается один вид диаграммы
+        val chunkH = (h - headerH) / 3 // size of the part of the screen for one chart
 
         buttons.clear()
         for (chunkX in 0..2) {
@@ -48,7 +48,7 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
                 val x = chunkX * chunkW
                 val y = headerH + chunkY * chunkH
 
-                // кнопка с названием диаграммы
+                // button with name of chart
                 val rectX0 = x + 5f
                 val rectX1 = x + chunkW - 5f
                 val rectY0 = y + chunkH - 25f
@@ -64,7 +64,7 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
                     basicFont, blackPaint
                 )
 
-                // предпросмотр диаграммы
+                // chart preview
                 chartDrawFunction[chartType]?.invoke(canvas,
                     x + 10f, y + 10f, chunkW - 20f, chunkH - 50f)
             }
@@ -74,8 +74,8 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
     private fun drawChartParametersScreen(canvas: Canvas) {
         require(chosenChart != null)
         buttons.clear()
-        canvas.drawString("Параметры", 20f, 20f + headerFont.size, headerFont, blackPaint)
-        canvas.drawString("Выберите цветовую тему", 20f, 100f + headerFont.size, basicFont, blackPaint)
+        canvas.drawString("Parameters", 20f, 20f + headerFont.size, headerFont, blackPaint)
+        canvas.drawString("Choose palette", 20f, 100f + headerFont.size, basicFont, blackPaint)
         val palettesY = 100f + headerFont.size + basicFont.size + 10f
         for (i in palettes.indices) {
             createButton(canvas, i * 120f + 20f, palettesY, (i + 1) * 120f, palettesY + 20f) {
@@ -88,7 +88,7 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
         }
 
         val showingLegendY = palettesY + 100f
-        val textShowingLegend = "Отображать легенду"
+        val textShowingLegend = "Show legend"
         canvas.drawString(textShowingLegend, 20f, showingLegendY + 5f,
             basicFont, blackPaint)
         val showingLegendButtonX = basicFont.measureTextWidth(textShowingLegend) + 30f
@@ -105,7 +105,7 @@ class MainRenderer(private val layer: SkiaLayer): SkiaRenderer {
 
         val saveY = showingLegendY + 100f
         createButton(canvas, 20f, saveY, 220f, saveY + 40f, ::saveInFileAndExit)
-        val saveText = "Сохранить и выйти"
+        val saveText = "Save and quit"
         canvas.drawString(saveText, 20f + (200f - basicFont.measureTextWidth(saveText)) / 2,
             saveY + 25f, basicFont, blackPaint)
     }
@@ -199,9 +199,9 @@ private fun drawScale(canvas: Canvas, step: Int, stepNum: Int,
 }
 
 fun drawBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val dataNum = min(inputData.data.size, 5) // number of displayed data sets
     val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
-    val (step, stepNum) = calculateStep(maxValue) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // vertical grid spacing and number of segments
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -213,7 +213,7 @@ fun drawBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 
     drawScale(canvas, step, stepNum, x, y, h - bottomTab, font)
 
-    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    val horStepLen = (w - leftTab) / (len + 1) // length of one horizontal segment
     inputData.firstRow.forEachIndexed { i, name ->
         canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
             y + h, font, blackPaint)
@@ -231,7 +231,7 @@ fun drawBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 }
 
 fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val dataNum = min(inputData.data.size, 5) // number of displayed data sets
     val prefixSums = List(inputData.firstRow.size) { mutableListOf(0) }
     for (i in inputData.firstRow.indices) {
         inputData.data.forEach {
@@ -239,7 +239,7 @@ fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) 
         }
     }
     val maxValue = prefixSums.maxOf { it.last() }
-    val (step, stepNum) = calculateStep(maxValue) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // vertical grid spacing and number of segments
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -251,7 +251,7 @@ fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) 
 
     drawScale(canvas, step, stepNum, x, y, h - bottomTab, font)
 
-    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    val horStepLen = (w - leftTab) / (len + 1) // length of one horizontal segment
     inputData.firstRow.forEachIndexed { i, name ->
         canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
             y + h, font, blackPaint)
@@ -267,14 +267,14 @@ fun drawStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) 
 }
 
 fun drawNormStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val dataNum = min(inputData.data.size, 5) // number of displayed data sets
     val prefixSums = List(inputData.firstRow.size) { mutableListOf(0) }
     for (i in inputData.firstRow.indices) {
         inputData.data.forEach {
             prefixSums[i].add(prefixSums[i].last() + it[i])
         }
     }
-    val (step, stepNum) = Pair(10, 10) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = Pair(10, 10) // vertical grid spacing and number of segments
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -286,7 +286,7 @@ fun drawNormStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Flo
 
     drawScale(canvas, step, stepNum, x, y, h - bottomTab, font, true)
 
-    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    val horStepLen = (w - leftTab) / (len + 1) // length of one horizontal segment
     inputData.firstRow.forEachIndexed { i, name ->
         canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
             y + h, font, blackPaint)
@@ -302,9 +302,9 @@ fun drawNormStackedBarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Flo
 }
 
 fun drawLineChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val dataNum = min(inputData.data.size, 5) // number of displayed data sets
     val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
-    val (step, stepNum) = calculateStep(maxValue) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // vertical grid spacing and number of segments
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -316,7 +316,7 @@ fun drawLineChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 
     drawScale(canvas, step, stepNum, x, y, h - bottomTab, font)
 
-    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    val horStepLen = (w - leftTab) / (len + 1) // length of one horizontal segment
     inputData.firstRow.forEachIndexed { i, name ->
         canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
             y + h, font, blackPaint)
@@ -333,7 +333,7 @@ fun drawLineChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 }
 
 fun drawAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val dataNum = min(inputData.data.size, 5) // number of displayed data sets
     val prefixSums = List(inputData.firstRow.size) { mutableListOf(0) }
     for (i in inputData.firstRow.indices) {
         inputData.data.forEach {
@@ -341,7 +341,7 @@ fun drawAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
         }
     }
     val maxValue = prefixSums.maxOf { it.last() }
-    val (step, stepNum) = calculateStep(maxValue) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // vertical grid spacing and number of segments
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -353,7 +353,7 @@ fun drawAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 
     drawScale(canvas, step, stepNum, x, y, h - bottomTab, font)
 
-    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    val horStepLen = (w - leftTab) / (len + 1) // length of one horizontal segment
     inputData.firstRow.forEachIndexed { i, name ->
         canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
             y + h, font, blackPaint)
@@ -371,14 +371,14 @@ fun drawAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 }
 
 fun drawNormAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val dataNum = min(inputData.data.size, 5) // number of displayed data sets
     val prefixSums = List(inputData.firstRow.size) { mutableListOf(0) }
     for (i in inputData.firstRow.indices) {
         inputData.data.forEach {
             prefixSums[i].add(prefixSums[i].last() + it[i])
         }
     }
-    val (step, stepNum) = Pair(10, 10) // вертикальный шаг сетки и количество делений
+    val (step, stepNum) = Pair(10, 10) // vertical grid spacing and number of segments
 
     val fontSize = w / 80
     val font = Font(typeface, fontSize)
@@ -390,7 +390,7 @@ fun drawNormAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 
     drawScale(canvas, step, stepNum, x, y, h - bottomTab, font, true)
 
-    val horStepLen = (w - leftTab) / (len + 1) // длина одного горизонтального деления
+    val horStepLen = (w - leftTab) / (len + 1) // length of one horizontal segment
     inputData.firstRow.forEachIndexed { i, name ->
         canvas.drawString(name, x + leftTab + horStepLen * (i + 1) - font.measureTextWidth(name) / 2,
             y + h, font, blackPaint)
@@ -409,7 +409,7 @@ fun drawNormAreaChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 
 fun drawPieChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
     val data = inputData.data.first()
-    val dataNum = min(5, data.size) // максимальное количество сегментов
+    val dataNum = min(5, data.size) // max number of segments
     val prefixSums = mutableListOf(0)
     for (i in 0 until dataNum)
         prefixSums.add(prefixSums.last() + data[i])
@@ -445,9 +445,9 @@ fun drawPieChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
 }
 
 fun drawRadarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
-    val dataNum = min(inputData.data.size, 5) // количество отображаемых наборов данных
+    val dataNum = min(inputData.data.size, 5) // number of displayed data sets
     val maxValue = inputData.data.subList(0, dataNum).maxOf { it.maxOf { x -> x } }
-    val (step, stepNum) = calculateStep(maxValue) // шаг оси и количество делений
+    val (step, stepNum) = calculateStep(maxValue) // grid spacing and number of segments
     val angleStep = 2 * PI / inputData.firstRow.size
 
     val fontSize = w / 80
@@ -457,7 +457,7 @@ fun drawRadarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
     val centerX = x + w / 2
     val centerY = y + h / 2
     val radius = min(w / 2 - tab, h / 2 - fontSize * 3 / 2)
-    // рисование радиальной сетки
+    // radar grid drawing
     for (i in 1..stepNum)
         canvas.drawCircle(centerX, centerY, radius / stepNum * i,
             greyPaintStroke)
@@ -482,7 +482,7 @@ fun drawRadarChart(canvas: Canvas, x: Float, y: Float, w: Float, h: Float) {
     drawScale(canvas, step, stepNum, centerX - font.measureTextWidth((step * stepNum).toString()) * 11 / 10,
         centerY - radius, radius, font)
 
-    // рисование данных
+    // drawing data
     for (pos in 0 until dataNum) {
         val polygon = inputData.data[pos].mapIndexed { i, value ->
             val rad = value.toFloat() / step * radius / stepNum

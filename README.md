@@ -1,36 +1,26 @@
-# Курс основ программирования на МКН СПбГУ
-## Проект 3: визуализация данных
+# Basics of programming course: data visualization, charts
 
-[Постановка задачи](./TASK.md)
+### Usage
 
-### Описание работы программы
+The name of the file with the data for building the chart
+is passed to the program as the argument.
 
-Программе в качестве аргумента командной строки передаётся имя файла
-с данными для построения диаграммы.
+The data are presented in the form of a table (see examples).
 
-Данные должны быть представлены в виде таблицы: первое слово в каждой 
-строке - это название строки. В первой строке содержатся названия столбцов,
-в остальных неотрицательные целые числа - данные. Во всех строках должно
-быть равное количество слов. (см. примеры)
+When you start the program, two windows open - the first one will offer to
+select the chart format. To select it, click on the button with the chart
+name. After that the chart parameters will appear, and
+in the second window the required chart will be drawn.
 
-Если в файле больше пяти строк с данными, то отображены будут только
-первые пять. Также при построении круговой диаграммы используется только
-одна строка с данными, причем из неё берется не больше пяти первых значений.
+You can change the chart parameters by clicking on the 
+corresponding buttons.
 
-При запуске программы открываются два окна - в первом будет предложено
-выбрать требуемый формат диаграммы, для выбора необходимо кликнуть по
-кнопке с названием диаграммы, после чего появятся параметры диаграммы, а
-во втором окне требуемая диаграмма будет нарисована.
+To save the chart and stop the program, you can click the "Save and quit" 
+button. The chart will be saved in file "output.png".
 
-Вы можете изменять параметры диаграммы - цветовую палитру и видимость 
-легенды, нажимая на соответствующие кнопки.
+### Examples
 
-Для сохранения диаграммы и завершения работы программы необходимо нажать
-кнопку "Сохранить и выйти". Диаграмма будет сохранена в файл output.png.
-
-### Примеры работы программы
-
-Файл data.txt содержит:
+File "data.txt" contains:
 
 <pre>
 Months january february march april may june july august september october november december
@@ -39,20 +29,20 @@ Company2 50 38 20 47 30 25 16 42 34 41 17 18
 Company3 13 30 20 56 34 27 84 62 83 49 31 43
 </pre>
 
-При запуске программы с аргументом data.txt откроется окно
+When you run the program with argument "data.txt", a window will open:
 
 ![image](./pictures/1.png)
 
-При нажатии на кнопку "Гистограмма" во втором окне
-появится диаграмма
+When you click on the "Histogram" button in the second window
+a chart will appear:
 
 ![image](./pictures/2.png)
 
-Изменение параметров:
+Changing parameters:
 
 ![image](./pictures/3.png)
 
 ![image](./pictures/4.png)
 
-При нажатии на кнопку "Сохранить и выйти" программа завершается
-и сохраняет диаграмму в файл.
+When you click on the "Save and quit" button, the program ends
+and saves the chart to a file.

@@ -58,7 +58,7 @@ fun main(args: Array<String>) {
         inputData = getDataFromFile(args[0])
         checkData(inputData)
         createChartWindow("chart")
-        createMainWindow("pf-2021-viz")
+        createMainWindow("menu")
     } catch (e : Exception) {
         println(e.message)
     }
